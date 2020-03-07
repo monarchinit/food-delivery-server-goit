@@ -1,4 +1,5 @@
 const http = require("http");
+const URL = require("url");
 const routes = require("./routes/routes");
 
 class ProductsServer {
@@ -14,7 +15,7 @@ class ProductsServer {
   }
 
   initRoutes() {
-    this.routes = [...routes];
+    this.routes = routes;
   }
 
   initServer() {
@@ -23,18 +24,17 @@ class ProductsServer {
 
   async serverCallback(req, res) {
     const { method, url } = req;
-    const handled = this.routes.some(route => {
-      if (route.method === method && route.url === url) {
+    const pathname = URL.parse(url).pathname;
+    const handled = this.routes(req, res).some(route => {
+      if (route.method === method && route.url === pathname) {
         try {
-          route.handler(req, res);
+          route.handler(req, res, route.id);
         } catch (err) {
           res.statusCode = 500;
           res.end();
         }
         return true;
       }
-   
-
       return false;
     });
 
