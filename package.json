@@ -20,6 +20,8 @@
   },
   "homepage": "https://github.com/monarchinit/food-delivery-server-goit#readme",
   "dependencies": {
+    "express": "^4.17.1",
+    "formidable": "^1.2.2",
     "joi": "^14.3.1",
     "nodemon": "^2.0.2"
   }
