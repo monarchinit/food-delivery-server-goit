@@ -1,47 +1,47 @@
 const http = require("http");
 const URL = require("url");
-const routes = require("./routes/routes");
+const express = require("express");
+const productsRouter = require("./products/routes/products.router");
+const productsIdRouter = require("./products/routes/productsId.router");
+const userRouter = require("./products/routes/user.router");
+const userIdRouter = require("./products/routes/userId.router");
+const ordersRouter = require("./products/routes/orders.router");
+const imagesRouter = require("./products/routes/imagesRouter")
 
 class ProductsServer {
   constructor(port) {
+    this.server = null;
     this.routes = null;
     this.port = port;
   }
 
   start() {
-    this.initRoutes();
     this.initServer();
+    this.initMiddlewares();
+    this.initRoutes();
     this.startListening();
   }
 
   initRoutes() {
-    this.routes = routes;
+    this.server.use("/products", productsRouter);
+    this.server.use("/products/:productsId", productsIdRouter);
+    this.server.use("/users", userRouter);
+    this.server.use("/users/:usersId", userIdRouter);
+    this.server.use("/orders", ordersRouter);
+    this.server.use("/images", imagesRouter);
+    this.server.use((err, req, res, next) => {
+      delete err.stack;
+      next(err);
+    });
   }
 
   initServer() {
-    this.server = http.createServer(this.serverCallback.bind(this));
+    this.server = express();
   }
 
-  async serverCallback(req, res) {
-    const { method, url } = req;
-    const pathname = URL.parse(url).pathname;
-    const handled = this.routes(req, res).some(route => {
-      if (route.method === method && route.url === pathname) {
-        try {
-          route.handler(req, res, route.id);
-        } catch (err) {
-          res.statusCode = 500;
-          res.end();
-        }
-        return true;
-      }
-      return false;
-    });
-
-    if (!handled) {
-      res.statusCode = 404;
-      res.end();
-    }
+  initMiddlewares() {
+    this.server.use(express.json());
+    this.server.use(express.static("static"));
   }
 
   startListening() {
