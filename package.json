@@ -20,9 +20,12 @@
   },
   "homepage": "https://github.com/monarchinit/food-delivery-server-goit#readme",
   "dependencies": {
+    "@hapi/joi": "^17.1.1",
+    "esm": "^3.2.25",
     "express": "^4.17.1",
     "formidable": "^1.2.2",
     "joi": "^14.3.1",
+    "mongoose": "^5.9.5",
     "nodemon": "^2.0.2"
   }
 }

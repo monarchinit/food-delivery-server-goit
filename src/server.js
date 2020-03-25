@@ -1,34 +1,30 @@
-const http = require("http");
-const URL = require("url");
 const express = require("express");
-const productsRouter = require("./products/routes/products.router");
-const productsIdRouter = require("./products/routes/productsId.router");
-const userRouter = require("./products/routes/user.router");
-const userIdRouter = require("./products/routes/userId.router");
-const ordersRouter = require("./products/routes/orders.router");
-const imagesRouter = require("./products/routes/imagesRouter")
+const mongoose = require("mongoose");
+const productsRouter = require("./products/products.router");
+const usersRouter = require("./users/users.router");
+const ordersRouter = require("./orders/orders.router");
+
 
 class ProductsServer {
-  constructor(port) {
+  constructor(config) {
     this.server = null;
     this.routes = null;
-    this.port = port;
+    this.port = config.port;
+    this.mongodb_url = config.mongodb_url;
   }
 
-  start() {
+  async start() {
     this.initServer();
     this.initMiddlewares();
     this.initRoutes();
+    await this.initDb();
     this.startListening();
   }
 
   initRoutes() {
     this.server.use("/products", productsRouter);
-    this.server.use("/products/:productsId", productsIdRouter);
-    this.server.use("/users", userRouter);
-    this.server.use("/users/:usersId", userIdRouter);
+    this.server.use("/users", usersRouter);
     this.server.use("/orders", ordersRouter);
-    this.server.use("/images", imagesRouter);
     this.server.use((err, req, res, next) => {
       delete err.stack;
       next(err);
@@ -42,6 +38,19 @@ class ProductsServer {
   initMiddlewares() {
     this.server.use(express.json());
     this.server.use(express.static("static"));
+    this.server.use(express.urlencoded({ extended: true }));
+  }
+
+  async initDb() {
+    await mongoose.set("useNewUrlParser", true);
+    await mongoose.set("useFindAndModify", false);
+    await mongoose.set("useCreateIndex", true);
+    await mongoose.set("useUnifiedTopology", true);
+    await mongoose.connect(this.mongodb_url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      autoIndex: false
+    });
   }
 
   startListening() {

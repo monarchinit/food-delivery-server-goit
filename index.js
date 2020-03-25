@@ -1,4 +1,5 @@
-const ProductsServer = require('./src/server');
-const { port } = require('./config');
+require = require("esm")(module);
+const ProductsServer = require("./src/server");
+const config = require("./config");
 
-new ProductsServer(port).start()
+new ProductsServer(config).start();
